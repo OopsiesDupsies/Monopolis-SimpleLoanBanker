@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Monopolis — Simple Loan Banker</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    :root{
+      --bg-primary: #0a0f1e;
+      --bg-secondary: #0e1429;
+      --bg-tertiary: #1a2142;
+      --card-bg: linear-gradient(145deg, #121936, #1a2142);
+      --card-border: rgba(139, 233, 253, 0.2);
+      --ink: #f8faff;
+      --ink-secondary: #d1d9f0;
+      --muted: #8b9dc9;
+      --accent: #8be9fd;
+      --accent-glow: rgba(139, 233, 253, 0.3);
+      --good: #50fa7b;
+      --good-glow: rgba(80, 250, 123, 0.3);
+      --bad: #ff5555;
+      --bad-glow: rgba(255, 85, 85, 0.3);
+      --warning: #ffb86c;
+      --warning-glow: rgba(255, 184, 108, 0.3);
+      --purple: #bd93f9;
+      --purple-glow: rgba(189, 147, 249, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%);
+      background-attachment: fixed;
+      color: var(--ink);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* Animated background particles */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(circle at 20% 50%, rgba(139, 233, 253, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(80, 250, 123, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(189, 147, 249, 0.04) 0%, transparent 50%);
+      animation: float 20s ease-in-out infinite;
+      z-index: -1;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+
+    header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: rgba(10, 15, 30, 0.95);
+      backdrop-filter: blur(20px);
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .pill {
+      border: 1px solid var(--card-border);
+      border-radius: 999px;
+      padding: 8px 16px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      background: rgba(26, 33, 66, 0.5);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .pill:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    main {
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.5;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 
+        0 12px 48px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 20px;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    label {
+      font-size: 13px;
+      color: var(--muted);
+      display: block;
+      margin: 0 0 6px;
+      font-weight: 500;
+    }
+
+    input, select, button {
+      font: inherit;
+      transition: all 0.2s ease;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: rgba(14, 20, 48, 0.7);
+      color: var(--ink);
+      font-size: 14px;
+      backdrop-filter: blur(10px);
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+      background: rgba(14, 20, 48, 0.9);
+    }
+
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+    
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    button {
+      padding: 12px 20px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: rgba(19, 27, 62, 0.8);
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+
+    button:hover::before {
+      left: 100%;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      border-color: #3b82f6;
+      color: white;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+    }
+
+    button.primary:hover {
+      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    button.good {
+      background: linear-gradient(135deg, #16a34a, var(--good));
+      border-color: var(--good);
+      color: white;
+      box-shadow: 0 0 15px var(--good-glow);
+    }
+
+    button.good:hover {
+      box-shadow: 0 4px 20px var(--good-glow);
+    }
+
+    button.bad {
+      background: linear-gradient(135deg, #dc2626, var(--bad));
+      border-color: var(--bad);
+      color: white;
+      box-shadow: 0 0 15px var(--bad-glow);
+    }
+
+    button.bad:hover {
+      box-shadow: 0 4px 20px var(--bad-glow);
+    }
+
+    button.warning {
+      background: linear-gradient(135deg, #d97706, var(--warning));
+      border-color: var(--warning);
+      color: white;
+      box-shadow: 0 0 15px var(--warning-glow);
+    }
+
+    button.warning:hover {
+      box-shadow: 0 4px 20px var(--warning-glow);
+    }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .players {
+      display: grid;
+      gap: 20px;
+    }
+
+    .player {
+      padding: 20px;
+      border-radius: 16px;
+      border: 2px dashed var(--card-border);
+      background: rgba(26, 33, 66, 0.3);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .player::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 16px;
+      padding: 2px;
+      background: linear-gradient(135deg, var(--accent), var(--purple), var(--good));
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: xor;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .player:hover::before {
+      opacity: 0.6;
+    }
+
+    .player:hover {
+      transform: translateY(-2px);
+      background: rgba(26, 33, 66, 0.5);
+    }
+
+    .head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .player-info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .player-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .player-stats {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .stat-pill {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid var(--card-border);
+      background: rgba(14, 20, 48, 0.5);
+    }
+
+    .stat-pill.score { border-color: var(--accent); color: var(--accent); }
+    .stat-pill.worth { border-color: var(--good); color: var(--good); }
+    .stat-pill.turns { border-color: var(--purple); color: var(--purple); }
+
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px dashed var(--card-border);
+      padding-top: 12px;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    .stat-value {
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    details {
+      margin-top: 16px;
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(14, 20, 48, 0.8);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    details summary {
+      cursor: pointer;
+      padding: 16px 20px;
+      background: linear-gradient(135deg, rgba(139, 233, 253, 0.1), rgba(139, 233, 253, 0.2));
+      font-weight: 700;
+      color: var(--accent);
+      transition: all 0.3s ease;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    details summary::before {
+      content: '▼';
+      font-size: 12px;
+      transition: transform 0.3s ease;
+      margin-left: 8px;
+    }
+
+    details[open] summary::before {
+      transform: rotate(180deg);
+    }
+
+    details summary:hover {
+      background: linear-gradient(135deg, rgba(139, 233, 253, 0.2), rgba(139, 233, 253, 0.3));
+      transform: translateY(-1px);
+      box-shadow: inset 0 0 20px rgba(139, 233, 253, 0.1);
+    }
+
+    details[open] summary {
+      border-bottom: 1px solid var(--accent);
+      border-radius: 12px 12px 0 0;
+    }
+
+    details summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details .content {
+      padding: 16px;
+    }
+
+    .loans {
+      margin-top: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .loan-card {
+      background: rgba(11, 18, 48, 0.8);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .loan-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .loan-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .loan-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .loan-badge.emergency { background: var(--bad-glow); color: var(--bad); border: 1px solid var(--bad); }
+    .loan-badge.normal { background: var(--warning-glow); color: var(--warning); border: 1px solid var(--warning); }
+    .loan-badge.dev { background: var(--good-glow); color: var(--good); border: 1px solid var(--good); }
+
+    .loan-info {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .tiny {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .log {
+      margin-top: 12px;
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      main { padding: 16px; }
+      .card { padding: 16px; }
+      .grid2 { grid-template-columns: 1fr; }
+      .head { flex-direction: column; align-items: stretch; }
+      .player-stats { justify-content: center; }
+    }
+
+    /* Loading animation */
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    .loading {
+      animation: pulse 2s infinite;
+    }
+
+    /* Smooth transitions for dynamic content */
+    .fade-in {
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🏦 Monopolis — Enhanced Loan Banker</h1>
+    <div class="pill">Manual payments only • Waits are by your turns</div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Add Player</h2>
+      <div class="grid2">
+        <div><label>Name</label><input id="name" placeholder="e.g., Thimble"/></div>
+        <div><label>Income (optional)</label><input id="income" type="number" value="200" step="10"/></div>
+        <div><label>Cash</label><input id="cash" type="number" value="1500" step="10"/></div>
+        <div><label>Land (bank value)</label><input id="land" type="number" value="0" step="10"/></div>
+        <div><label>Homes (bank value)</label><input id="homes" type="number" value="0" step="10"/></div>
+        <div><label>&nbsp;</label><button id="add" class="good">Add Player</button></div>
+      </div>
+      <div class="row" style="margin-top: 16px">
+        <button id="save" class="primary">Export JSON</button>
+        <label class="pill" style="cursor: pointer;">Import <input id="load" type="file" accept="application/json" style="display:none"></label>
+        <button id="reset" class="bad">Reset All</button>
+      </div>
+      <div class="tiny" style="margin-top: 12px; line-height: 1.6;">
+        <strong>Loan Rates:</strong> Emergency 50% (instant, single payment), Normal 20% (wait 2 turns), Development 15% (wait 3–4 turns, max 3 houses).<br>
+        <strong>House Rule:</strong> Players agree when a payment is due; click <strong>Pay</strong> to settle an installment. Use <strong>Late</strong> if they miss it.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Players</h2>
+      <div id="players" class="players"></div>
+    </section>
+  </main>
+
+  <template id="player_t">
+    <div class="player fade-in">
+      <div class="head">
+        <div class="player-info">
+          <div class="player-name nm">Player</div>
+          <div class="player-stats">
+            <span class="stat-pill score cs">Score 0.0</span>
+            <span class="stat-pill worth nw">NW 0</span>
+            <span class="stat-pill turns tr">Turns 0</span>
+          </div>
+        </div>
+        <div class="row">
+          <button class="turn primary">End Turn</button>
+          <button class="rm bad">Remove</button>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div><label>Cash</label><input class="cash" type="number" step="10"></div>
+        <div><label>Income (memo)</label><input class="income" type="number" step="10"></div>
+        <div><label>Land</label><input class="land" type="number" step="10"></div>
+        <div><label>Homes</label><input class="homes" type="number" step="10"></div>
+      </div>
+
+      <div class="stat"><span>Max Loan (E/N/D)</span><span class="stat-value max">0/0/0</span></div>
+      <div class="stat"><span>Performance</span><span class="stat-value pf">—</span></div>
+
+      <details>
+        <summary>Take Loan <span class="tiny">(payments are manual)</span></summary>
+        <div class="content">
+          <div class="grid2">
+            <div>
+              <label>Type</label>
+              <select class="lt">
+                <option value="emergency">Emergency (instant, single payment)</option>
+                <option value="normal">Normal (wait 2 turns)</option>
+                <option value="dev">Development (wait 3–4 turns)</option>
+              </select>
+            </div>
+            <div>
+              <label>Amount</label>
+              <input class="amt" type="number" value="100" step="10">
+            </div>
+            <div class="installments-field">
+              <label>Installments (#)</label>
+              <input class="terms" type="number" value="3" min="1">
+            </div>
+            <div class="dev-wait-field">
+              <label>Dev Wait (turns)</label>
+              <select class="dwait"><option value="3">3</option><option value="4">4</option></select>
+            </div>
+            <div class="dev-houses-field">
+              <label>Dev Houses (≤3)</label>
+              <input class="dh" type="number" value="1" min="1" max="3">
+            </div>
+          </div>
+          <div class="row" style="margin-top: 12px">
+            <button class="prev">Preview</button>
+            <button class="cr primary">Create Loan</button>
+            <span class="tiny calc"></span>
+          </div>
+        </div>
+      </details>
+
+      <div class="loans"></div>
+    </div>
+  </template>
+
+  <template id="loan_t">
+    <div class="loan-card fade-in">
+      <div class="loan-header">
+        <div>
+          <span class="loan-badge badge">TYPE</span>
+          <span class="tiny">ID <span class="id"></span> • <span class="state">pending</span></span>
+        </div>
+        <div class="loan-info">
+          Per installment: <strong class="pergo">0</strong> • Left: <strong class="left">0</strong> • Remain: <strong class="rem">0</strong>
+        </div>
+      </div>
+      
+      <div class="grid2">
+        <div><label>Principal</label><input class="pr" type="number" disabled></div>
+        <div><label>Rate %/installment</label><input class="rt" type="number" disabled></div>
+        <div><label>Terms (#)</label><input class="tm" type="number" disabled></div>
+        <div><label>Disburse after (turns)</label><input class="dl" type="number" disabled></div>
+      </div>
+      
+      <div class="row" style="margin-top: 12px">
+        <button class="pay good">Pay</button>
+        <button class="early warning">Early Payoff</button>
+        <button class="late warning">Late</button>
+        <button class="def bad">Default</button>
+        <button class="close">Close</button>
+      </div>
+      
+      <div class="log"></div>
+    </div>
+  </template>
+
+  <script>
+  // ------- Fixed Settings -------
+  const RATES = { emergency: 50, normal: 20, dev: 15 };
+  const WAITS = { emergency: 0, normal: 2 }; // dev uses 3 or 4
+  const CAPS = { emergency: 30, normal: 50, dev: 40 }; // % of net worth, modulated by credit
+  const MIN_LOAN = 10;
+  const LATE_FEE_PCT = 10; // of installment
+  const EARLY_FINE_PCT = 2; // of remaining principal
+  const DEV_MAX_HOUSES = 3;
+
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  const ceil = n => Math.ceil(Number(n || 0));
+  const uid = () => Math.random().toString(36).slice(2, 8);
+  const save = () => localStorage.setItem('mono_enhanced', JSON.stringify(state));
+  const load = () => {
+    try { return JSON.parse(localStorage.getItem('mono_enhanced') || '{}'); }
+    catch { return {}; }
+  };
+
+  let state = Object.assign({ players: [] }, load());
+
+  // ------- Credit Score (−3..3 real) -------
+  function credit(p) {
+    let s = 0;
+    const nw = ceil(p.cash) + ceil(p.land) + ceil(p.homes);
+    if (nw > 0 || ceil(p.income) > 0) s += 1; // 1 = normal baseline
+    let total = 0, paid = 0, late = 0, def = 0, early = 0, activeRemain = 0;
+    for (const L of (p.loans || [])) {
+      total += ceil(L.terms || 0);
+      paid += ceil(L.paidCount || 0);
+      late += ceil(L.lateCount || 0);
+      def += L.defaulted ? 1 : 0;
+      early += L.early ? 1 : 0;
+      if (L.state === 'active') activeRemain += ceil(L.remain || 0);
+    }
+    const ontime = total ? paid / total : 0;
+    if (total > 0) {
+      if (ontime >= 0.8) s += 1;
+      if (late === 0) s += 1;
+    }
+    if (early > 0) s += 0.5;
+    if (def > 0) s -= Math.min(2, def * 1.0);
+    const util = activeRemain / Math.max(1, nw);
+    if (util > 0.8) s -= 1;
+    else if (util > 0.5) s -= 0.5;
+    s = Math.max(-3, Math.min(3, s));
+    return Math.round(s * 10) / 10;
+  }
+
+  function label(score) {
+    if (score <= -2) return 'High Risk';
+    if (score < 0) return 'Risky';
+    if (score < 1.5) return 'Normal';
+    if (score < 2.5) return 'Good';
+    return 'Excellent';
+  }
+
+  function capPct(base, score) {
+    const mult = Math.max(0.5, Math.min(1.4, 1 + score * 0.15));
+    return Math.floor(base * mult);
+  }
+
+  function netWorth(p) { return ceil(p.cash) + ceil(p.land) + ceil(p.homes); }
+  function maxLoan(p, type) { const base = CAPS[type]; return Math.floor(netWorth(p) * capPct(base, credit(p)) / 100); }
+  function schedule(principal, ratePct, terms) { const total = Math.ceil(principal * (1 + ratePct / 100)); return { total, pergo: Math.ceil(total / Math.max(1, terms)) }; }
+
+  // ------- UI -------
+  function render() {
+    const root = $('#players');
+    root.innerHTML = '';
+    for (const p of state.players) {
+      root.appendChild(renderPlayer(p));
+    }
+    save();
+  }
+
+  function renderPlayer(p) {
+    const t = $('#player_t').content.cloneNode(true);
+    t.querySelector('.nm').textContent = p.name;
+    t.querySelector('.cs').textContent = `Score ${credit(p).toFixed(1)} (${label(credit(p))})`;
+    t.querySelector('.nw').textContent = `NW ${netWorth(p)}`;
+    t.querySelector('.tr').textContent = `Turns ${p.turns || 0}`;
+
+    const cash = t.querySelector('.cash'), income = t.querySelector('.income'), land = t.querySelector('.land'), homes = t.querySelector('.homes');
+    cash.value = p.cash; income.value = p.income; land.value = p.land; homes.value = p.homes;
+    cash.onchange = e => { p.cash = ceil(e.target.value); render(); }
+    income.onchange = e => { p.income = ceil(e.target.value); render(); }
+    land.onchange = e => { p.land = ceil(e.target.value); render(); }
+    homes.onchange = e => { p.homes = ceil(e.target.value); render(); }
+
+    t.querySelector('.max').textContent = `${maxLoan(p, 'emergency')}/${maxLoan(p, 'normal')}/${maxLoan(p, 'dev')}`;
+    t.querySelector('.pf').textContent = perf(p);
+
+    // End Turn — only used to unlock pending loans after waits
+    t.querySelector('.turn').onclick = () => {
+      p.turns = (p.turns || 0) + 1;
+      for (const L of (p.loans || [])) {
+        if (L.state === 'pending') {
+          const waited = (p.turns - (L.created_turn || 0));
+          if (waited >= L.delayTurns) {
+            p.cash += L.principal;
+            L.state = 'active';
+            L.log.push(`Disbursed +${L.principal} at turn ${p.turns}`);
+          }
+        }
+      }
+      render();
+    };
+
+    t.querySelector('.rm').onclick = () => {
+      if (confirm('Remove player?')) {
+        state.players = state.players.filter(x => x.id !== p.id);
+        render();
+      }
+    };
+
+    // Handle loan type changes
+    const lt = t.querySelector('.lt');
+    const installmentsField = t.querySelector('.installments-field');
+    const devWaitField = t.querySelector('.dev-wait-field');
+    const devHousesField = t.querySelector('.dev-houses-field');
+    const terms = t.querySelector('.terms');
+
+    function updateLoanFields() {
+      const type = lt.value;
+      if (type === 'emergency') {
+        installmentsField.style.display = 'none';
+        devWaitField.style.display = 'none';
+        devHousesField.style.display = 'none';
+        terms.value = 1; // Emergency loans are always single payment
+      } else if (type === 'dev') {
+        installmentsField.style.display = 'block';
+        devWaitField.style.display = 'block';
+        devHousesField.style.display = 'block';
+      } else {
+        installmentsField.style.display = 'block';
+        devWaitField.style.display = 'none';
+        devHousesField.style.display = 'none';
+      }
+    }
+
+    lt.onchange = updateLoanFields;
+    updateLoanFields(); // Initialize on render
+
+    // loan form
+    const amt = t.querySelector('.amt'), dw = t.querySelector('.dwait'), dh = t.querySelector('.dh'), calc = t.querySelector('.calc');
+    
+    t.querySelector('.prev').onclick = () => {
+      const type = lt.value;
+      const amount = ceil(amt.value);
+      const rate = RATES[type];
+      const a = Math.max(MIN_LOAN, Math.min(amount, maxLoan(p, type)));
+      amt.value = a;
+      const termCount = type === 'emergency' ? 1 : ceil(terms.value);
+      const sc = schedule(a, rate, termCount);
+      const wait = type === 'dev' ? Number(dw.value) : (type === 'normal' ? 2 : 0);
+      calc.textContent = `Total ${sc.total} • ${sc.pergo} per installment • Disburse after ${wait} turn(s)`;
+    };
+
+    t.querySelector('.cr').onclick = () => {
+      const type = lt.value;
+      const amount = ceil(amt.value);
+      if (type === 'dev' && ceil(dh.value) > DEV_MAX_HOUSES) return alert('Dev max 3 houses.');
+      const max = maxLoan(p, type);
+      if (amount < MIN_LOAN) return alert('Min loan 10');
+      if (amount > max) return alert(`Max ${max} for ${type}`);
+      const rate = RATES[type];
+      const wait = type === 'dev' ? Number(dw.value) : (type === 'normal' ? 2 : 0);
+      const term = type === 'emergency' ? 1 : Math.max(1, ceil(terms.value));
+      const sc = schedule(amount, rate, term);
+      const L = {
+        id: uid(),
+        type,
+        principal: amount,
+        remain: amount,
+        rate,
+        terms: term,
+        pergo: sc.pergo,
+        created_turn: (p.turns || 0),
+        delayTurns: wait,
+        state: (wait ? 'pending' : 'active'),
+        paidCount: 0,
+        lateCount: 0,
+        defaulted: false,
+        early: false,
+        log: []
+      };
+      if (wait === 0) {
+        p.cash += amount;
+        L.log.push(`Disbursed instantly +${amount}`);
+      }
+      (p.loans || (p.loans = [])).push(L);
+      render();
+    };
+
+    // loans list
+    const list = document.createElement('div');
+    list.className = 'loans';
+    for (const L of (p.loans || [])) list.appendChild(renderLoan(p, L));
+    t.querySelector('.loans').replaceWith(list);
+
+    return t;
+  }
+
+  function perf(p) {
+    let t = 0, paid = 0, late = 0, def = 0, early = 0;
+    for (const L of (p.loans || [])) {
+      t += ceil(L.terms || 0);
+      paid += ceil(L.paidCount || 0);
+      late += ceil(L.lateCount || 0);
+      def += L.defaulted ? 1 : 0;
+      early += L.early ? 1 : 0;
+    }
+    const pct = t ? Math.round(100 * paid / t) : 0;
+    return `On-time ${pct}% • Late ${late} • Early ${early} • Defaults ${def}`;
+  }
+
+  function renderLoan(p, L) {
+    const t = $('#loan_t').content.cloneNode(true);
+    t.querySelector('.badge').textContent = L.type.toUpperCase();
+    t.querySelector('.badge').className = `loan-badge ${L.type}`;
+    t.querySelector('.id').textContent = L.id;
+    t.querySelector('.state').textContent = L.state;
+    t.querySelector('.pergo').textContent = L.pergo;
+    t.querySelector('.left').textContent = Math.max(0, L.terms - (L.paidCount || 0));
+    t.querySelector('.rem').textContent = L.remain;
+    t.querySelector('.pr').value = L.principal;
+    t.querySelector('.rt').value = L.rate;
+    t.querySelector('.tm').value = L.terms;
+    t.querySelector('.dl').value = L.delayTurns;
+
+    const log = t.querySelector('.log');
+    log.innerHTML = (L.log || []).slice(-4).map(x => '• ' + x).join('<br>');
+
+    t.querySelector('.pay').onclick = () => {
+      if (L.state !== 'active') return alert('Not active');
+      const payAmt = Math.min(L.pergo, L.remain);
+      if (p.cash < payAmt) return alert('Not enough cash');
+      p.cash -= payAmt;
+      L.remain = Math.max(0, L.remain - payAmt);
+      L.paidCount = (L.paidCount || 0) + 1;
+      L.log.push(`Pay ${payAmt}`);
+      if (L.remain === 0) {
+        L.state = 'cleared';
+        L.log.push('Cleared');
+      }
+      render();
+    };
+
+    t.querySelector('.early').onclick = () => {
+      if (L.state !== 'active') return alert('Not active');
+      const fine = Math.ceil(L.remain * EARLY_FINE_PCT / 100);
+      const total = L.remain + fine;
+      if (p.cash < total) return alert(`Need ${total}`);
+      p.cash -= total;
+      L.remain = 0;
+      L.state = 'cleared';
+      L.early = true;
+      L.log.push(`Early payoff ${total} (fine ${fine})`);
+      render();
+    };
+
+    t.querySelector('.late').onclick = () => {
+      if (L.state !== 'active') return alert('Not active');
+      const fee = Math.ceil(L.pergo * LATE_FEE_PCT / 100);
+      L.remain += fee;
+      L.lateCount = (L.lateCount || 0) + 1;
+      L.log.push(`Late (+${fee})`);
+      render();
+    };
+
+    t.querySelector('.def').onclick = () => {
+      if (!confirm('Default and seize assets (cash→homes→land)?')) return;
+      const order = ['cash', 'homes', 'land'];
+      let needed = L.remain;
+      const seize = { cash: 0, homes: 0, land: 0 };
+      for (const k of order) {
+        if (needed <= 0) break;
+        const avail = ceil(p[k]);
+        const take = Math.min(avail, needed);
+        p[k] = avail - take;
+        seize[k] += take;
+        needed -= take;
+      }
+      if (needed > 0) {
+        L.defaulted = true;
+        L.log.push(`Default: seized C${seize.cash}/H${seize.homes}/L${seize.land} (still short ${needed})`);
+      } else {
+        L.remain = 0;
+        L.state = 'cleared';
+        L.log.push(`Default cure: fully seized C${seize.cash}/H${seize.homes}/L${seize.land}`);
+      }
+      render();
+    };
+
+    t.querySelector('.close').onclick = () => {
+      if (L.remain > 0) return alert('Not cleared yet');
+      L.state = 'closed';
+      L.log.push('Closed');
+      render();
+    };
+
+    return t;
+  }
+
+  // ------- Add / Import / Export -------
+  $('#add').onclick = () => {
+    const p = {
+      id: uid(),
+      name: ($('#name').value || 'Player').trim(),
+      income: ceil($('#income').value || 200),
+      cash: ceil($('#cash').value || 1500),
+      land: ceil($('#land').value || 0),
+      homes: ceil($('#homes').value || 0),
+      loans: [],
+      turns: 0
+    };
+    state.players.push(p);
+    render();
+  };
+
+  $('#save').onclick = () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'monopolis_enhanced.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  $('label.pill').onclick = () => $('#load').click();
+
+  $('#load').onchange = async e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const txt = await f.text();
+    try {
+      state = JSON.parse(txt);
+    } catch {
+      alert('Invalid JSON');
+      return;
+    }
+    render();
+  };
+
+  $('#reset').onclick = () => {
+    if (confirm('Reset all?')) {
+      localStorage.removeItem('mono_enhanced');
+      state = { players: [] };
+      render();
+    }
+  };
+
+  render();
+  </script>
+</body>
+</html>
