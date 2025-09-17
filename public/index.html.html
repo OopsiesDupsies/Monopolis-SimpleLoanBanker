@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MonoCredit Multiplayer - Enhanced Credit System</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    :root{
+      --bg-primary: #0a0f1e;
+      --bg-secondary: #0e1429;
+      --bg-tertiary: #1a2142;
+      --card-bg: linear-gradient(145deg, #121936, #1a2142);
+      --card-border: rgba(139, 233, 253, 0.2);
+      --ink: #f8faff;
+      --ink-secondary: #d1d9f0;
+      --muted: #8b9dc9;
+      --accent: #8be9fd;
+      --accent-glow: rgba(139, 233, 253, 0.3);
+      --good: #50fa7b;
+      --good-glow: rgba(80, 250, 123, 0.3);
+      --bad: #ff5555;
+      --bad-glow: rgba(255, 85, 85, 0.3);
+      --warning: #ffb86c;
+      --warning-glow: rgba(255, 184, 108, 0.3);
+      --purple: #bd93f9;
+      --purple-glow: rgba(189, 147, 249, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%);
+      background-attachment: fixed;
+      color: var(--ink);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(circle at 20% 50%, rgba(139, 233, 253, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(80, 250, 123, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(189, 147, 249, 0.04) 0%, transparent 50%);
+      animation: float 20s ease-in-out infinite;
+      z-index: -1;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+
+    header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: rgba(10, 15, 30, 0.95);
+      backdrop-filter: blur(20px);
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .pill {
+      border: 1px solid var(--card-border);
+      border-radius: 999px;
+      padding: 8px 16px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      background: rgba(26, 33, 66, 0.5);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .pill:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    main {
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.5;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 
+        0 12px 48px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 20px;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    label {
+      font-size: 13px;
+      color: var(--muted);
+      display: block;
+      margin: 0 0 6px;
+      font-weight: 500;
+    }
+
+    input, select, button {
+      font: inherit;
+      transition: all 0.2s ease;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: rgba(14, 20, 48, 0.7);
+      color: var(--ink);
+      font-size: 14px;
+      backdrop-filter: blur(10px);
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+      background: rgba(14, 20, 48, 0.9);
+    }
+
+    button {
+      padding: 12px 20px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: rgba(19, 27, 62, 0.8);
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+
+    button:hover::before {
+      left: 100%;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      border-color: #3b82f6;
+      color: white;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+    }
+
+    button.primary:hover {
+      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    button.good {
+      background: linear-gradient(135deg, #16a34a, var(--good));
+      border-color: var(--good);
+      color: white;
+      box-shadow: 0 0 15px var(--good-glow);
+    }
+
+    button.good:hover {
+      box-shadow: 0 4px 20px var(--good-glow);
+    }
+
+    button.bad {
+      background: linear-gradient(135deg, #dc2626, var(--bad));
+      border-color: var(--bad);
+      color: white;
+      box-shadow: 0 0 15px var(--bad-glow);
+    }
+
+    button.bad:hover {
+      box-shadow: 0 4px 20px var(--bad-glow);
+    }
+
+    button.warning {
+      background: linear-gradient(135deg, #d97706, var(--warning));
+      border-color: var(--warning);
+      color: white;
+      box-shadow: 0 0 15px var(--warning-glow);
+    }
+
+    button.warning:hover {
+      box-shadow: 0 4px 20px var(--warning-glow);
+    }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .players {
+      display: grid;
+      gap: 20px;
+    }
+
+    .player {
+      padding: 20px;
+      border-radius: 16px;
+      border: 2px solid var(--card-border);
+      background: rgba(26, 33, 66, 0.3);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .player.is-turn {
+      border-color: var(--accent);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .player.is-host {
+      border-left: 4px solid var(--purple);
+    }
+
+    .player::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 16px;
+      padding: 2px;
+      background: linear-gradient(135deg, var(--accent), var(--purple), var(--good));
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: xor;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .player:hover::before {
+      opacity: 0.6;
+    }
+
+    .player:hover {
+      transform: translateY(-2px);
+      background: rgba(26, 33, 66, 0.5);
+    }
+
+    .head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .player-info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .player-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .player-stats {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .stat-pill {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid var(--card-border);
+      background: rgba(14, 20, 48, 0.5);
+    }
+
+    .stat-pill.score { border-color: var(--accent); color: var(--accent); }
+    .stat-pill.worth { border-color: var(--good); color: var(--good); }
+    .stat-pill.turns { border-color: var(--purple); color: var(--purple); }
+    .stat-pill.host { border-color: var(--warning); color: var(--warning); }
+
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px dashed var(--card-border);
+      padding-top: 12px;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    .stat-value {
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    details {
+      margin-top: 16px;
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(14, 20, 48, 0.8);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    details summary {
+      cursor: pointer;
+      padding: 16px 20px;
+      background: linear-gradient(135deg, rgba(139, 233, 253, 0.1), rgba(139, 233, 253, 0.2));
+      font-weight: 700;
+      color: var(--accent);
+      transition: all 0.3s ease;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    details summary::before {
+      content: '▼';
+      font-size: 12px;
+      transition: transform 0.3s ease;
+      margin-left: 8px;
+    }
+
+    details[open] summary::before {
+      transform: rotate(180deg);
+    }
+
+    details summary:hover {
+      background: linear-gradient(135deg, rgba(139, 233, 253, 0.2), rgba(139, 233, 253, 0.3));
+      transform: translateY(-1px);
+      box-shadow: inset 0 0 20px rgba(139, 233, 253, 0.1);
+    }
+
+    details[open] summary {
+      border-bottom: 1px solid var(--accent);
+      border-radius: 12px 12px 0 0;
+    }
+
+    details summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details .content {
+      padding: 16px;
+    }
+
+    .loans {
+      margin-top: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .loan-card {
+      background: rgba(11, 18, 48, 0.8);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .loan-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .loan-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .loan-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .loan-badge.emergency { background: var(--bad-glow); color: var(--bad); border: 1px solid var(--bad); }
+    .loan-badge.normal { background: var(--warning-glow); color: var(--warning); border: 1px solid var(--warning); }
+    .loan-badge.dev { background: var(--good-glow); color: var(--good); border: 1px solid var(--good); }
+
+    .loan-info {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .tiny {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .log {
+      margin-top: 12px;
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .connection-status {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      z-index: 1000;
+    }
+
+    .connection-status.connected {
+      background: var(--good-glow);
+      color: var(--good);
+      border: 1px solid var(--good);
+    }
+
+    .connection-status.disconnected {
+      background: var(--bad-glow);
+      color: var(--bad);
+      border: 1px solid var(--bad);
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      main { padding: 16px; }
+      .card { padding: 16px; }
+      .grid2 { grid-template-columns: 1fr; }
+      .head { flex-direction: column; align-items: stretch; }
+      .player-stats { justify-content: center; }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="connection-status" id="connectionStatus">
+    Connecting...
+  </div>
+
+  <header>
+    <h1>🏦 MonoCredit — Multiplayer Credit System</h1>
+    <div class="pill" id="roomInfo">Not connected</div>
+  </header>
+
+  <main>
+    <!-- Join/Create Room Screen -->
+    <section class="card" id="joinScreen">
+      <h2>Join or Create Room</h2>
+      <div class="grid2">
+        <div>
+          <label>Your Name</label>
+          <input id="playerName" placeholder="Enter your name" value="Player">
+        </div>
+        <div>
+          <label>Room ID (leave empty to create)</label>
+          <input id="roomId" placeholder="e.g., A1B2C3" style="text-transform: uppercase;">
+        </div>
+        <div>
+          <label>Mode (for new rooms)</label>
+          <select id="gameMode">
+            <option value="manual">Manual - Host controls</option>
+            <option value="automatic">Automatic - Self-managed</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" style="margin-top: 16px;">
+        <button id="joinRoom" class="primary">Join Room</button>
+        <button id="createRoom" class="good">Create New Room</button>
+      </div>
+      <div class="tiny" style="margin-top: 16px; line-height: 1.6;">
+        <strong>Manual Mode:</strong> Host manages all players and controls turns.<br>
+        <strong>Automatic Mode:</strong> Players manage themselves, loans processed automatically.
+      </div>
+    </section>
+
+    <!-- Game Screen -->
+    <section class="card hidden" id="gameScreen">
+      <div class="row" style="justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h2 id="gameTitle">Game Lobby</h2>
+        <div class="row">
+          <button id="startGame" class="good hidden">Start Game</button>
+          <button id="leaveRoom" class="bad">Leave Room</button>
+        </div>
+      </div>
+
+      <!-- Host Panel -->
+      <div id="hostPanel" class="hidden">
+        <div class="card" style="border: 2px solid var(--purple);">
+          <h3 style="color: var(--purple); margin-bottom: 16px;">🎯 Host Controls</h3>
+          <div class="row">
+            <select id="hostTargetPlayer">
+              <option value="">Select player...</option>
+            </select>
+            <button id="kickPlayer" class="warning">Kick</button>
+            <button id="banPlayer" class="bad">Ban</button>
+            <button id="deleteRoom" class="bad">Delete Room</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Player Panel -->
+      <div id="playerPanel" class="hidden">
+        <div class="card" style="border: 2px solid var(--accent);">
+          <h3 style="color: var(--accent); margin-bottom: 16px;">💳 Your Profile</h3>
+          <div id="myPlayerCard"></div>
+        </div>
+      </div>
+
+      <!-- All Players -->
+      <div class="card">
+        <h3>All Players</h3>
+        <div id="allPlayers" class="players"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modals -->
+  <div id="errorModal" class="modal hidden">
+    <div class="modal-content">
+      <h3 style="color: var(--bad); margin-bottom: 16px;">❌ Error</h3>
+      <p id="errorMessage"></p>
+      <button onclick="closeModal('errorModal')" class="primary" style="margin-top: 16px;">OK</button>
+    </div>
+  </div>
+
+  <div id="kickedModal" class="modal hidden">
+    <div class="modal-content">
+      <h3 style="color: var(--warning); margin-bottom: 16px;">⚠️ Kicked</h3>
+      <p id="kickedMessage">You have been kicked from the room.</p>
+      <button onclick="location.reload()" class="primary" style="margin-top: 16px;">OK</button>
+    </div>
+  </div>
+
+  <div id="bannedModal" class="modal hidden">
+    <div class="modal-content">
+      <h3 style="color: var(--bad); margin-bottom: 16px;">🚫 Banned</h3>
+      <p id="bannedMessage">You have been banned from this room.</p>
+      <button onclick="location.reload()" class="primary" style="margin-top: 16px;">OK</button>
+    </div>
+  </div>
+
+  <!-- Templates -->
+  <template id="playerTemplate">
+    <div class="player fade-in">
+      <div class="head">
+        <div class="player-info">
+          <div class="player-name"></div>
+          <div class="player-stats">
+            <span class="stat-pill score"></span>
+            <span class="stat-pill worth"></span>
+            <span class="stat-pill turns"></span>
+            <span class="stat-pill host hidden">HOST</span>
+          </div>
+        </div>
+        <div class="row player-controls">
+          <button class="endTurn primary">End Turn</button>
+        </div>
+      </div>
+
+      <div class="grid2 player-fields">
+        <div><label>Cash</label><input class="cash" type="number" step="10"></div>
+        <div><label>Income</label><input class="income" type="number" step="10"></div>
+        <div><label>Land</label><input class="land" type="number" step="10"></div>
+        <div><label>Homes</label><input class="homes" type="number" step="10"></div>
+      </div>
+
+      <div class="stat"><span>Max Loan (E/N/D)</span><span class="stat-value max-loans">0/0/0</span></div>
+      <div class="stat"><span>Performance</span><span class="stat-value performance">—</span></div>
+
+      <details class="loan-section">
+        <summary>Take Loan <span class="tiny">(subject to credit approval)</span></summary>
+        <div class="content">
+          <div class="grid2">
+            <div>
+              <label>Type</label>
+              <select class="loanType">
+                <option value="emergency">Emergency (instant, single payment)</option>
+                <option value="normal">Normal (wait 2 turns)</option>
+                <option value="dev">Development (wait 3-4 turns)</option>
+              </select>
+            </div>
+            <div>
+              <label>Amount</label>
+              <input class="loanAmount" type="number" value="100" step="10">
+            </div>
+            <div class="installments-field">
+              <label>Installments (#)</label>
+              <input class="loanTerms" type="number" value="3" min="1">
+            </div>
+            <div class="dev-wait-field hidden">
+              <label>Dev Wait (turns)</label>
+              <select class="devWait"><option value="3">3</option><option value="4">4</option></select>
+            </div>
+          </div>
+          <div class="row" style="margin-top: 12px">
+            <button class="previewLoan">Preview</button>
+            <button class="takeLoan primary">Take Loan</button>
+            <span class="tiny loan-calc"></span>
+          </div>
+        </div>
+      </details>
+
+      <div class="loans"></div>
+    </div>
+  </template>
+
+  <template id="loanTemplate">
+    <div class="loan-card fade-in">
+      <div class="loan-header">
+        <div>
+          <span class="loan-badge"></span>
+          <span class="tiny">ID <span class="loan-id"></span> • <span class="loan-state">pending</span></span>
+        </div>
+        <div class="loan-info">
+          Per installment: <strong class="loan-pergo">0</strong> • Left: <strong class="loan-left">0</strong> • Remain: <strong class="loan-remain">0</strong>
+        </div>
+      </div>
+      
+      <div class="grid2">
+        <div><label>Principal</label><input class="loan-principal" type="number" disabled></div>
+        <div><label>Rate %/installment</label><input class="loan-rate" type="number" disabled></div>
+        <div><label>Terms (#)</label><input class="loan-terms-display" type="number" disabled></div>
+        <div><label>Disburse after (turns)</label><input class="loan-delay" type="number" disabled></div>
+      </div>
+      
+      <div class="row" style="margin-top: 12px">
+        <button class="payLoan good">Pay</button>
+        <button class="earlyPayoff warning">Early Payoff</button>
+        <button class="latePay warning">Late</button>
+        <button class="defaultLoan bad">Default</button>
+      </div>
+      
+      <div class="loan-log log"></div>
+    </div>
+  </template>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    // Enhanced Settings
+    const RATES = { emergency: 50, normal: 20, dev: 15 };
+    const WAITS = { emergency: 0, normal: 2 };
+    const CAPS = { emergency: 30, normal: 50, dev: 40 };
+    const MIN_LOAN = 10;
+
+    // Global state
+    let socket;
+    let currentRoom = null;
+    let myPlayerId = null;
+    let isHost = false;
+    let gameMode = 'manual';
+    let allPlayers = new Map();
+
+    // Utility functions
+    const $ = s => document.querySelector(s);
+    const $ = s => Array.from(document.querySelectorAll(s));
+    const ceil = n => Math.ceil(Number(n || 0));
+    
+    function showError(message) {
+      $('#errorMessage').textContent = message;
+      $('#errorModal').classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      $(`#${id}`).classList.add('hidden');
+    }
+
+    // Credit scoring functions (same as original)
+    function netWorth(p) { 
+      return ceil(p.cash) + ceil(p.land) + ceil(p.homes); 
+    }
+
+    function credit(p) {
+      let s = 1.0;
+      const nw = netWorth(p);
+      
+      if (nw <= 0 && ceil(p.income) <= 0) s -= 1.5;
+      else if (nw > 2000) s += 0.5;
+      
+      let total = 0, paid = 0, late = 0, def = 0, early = 0, activeRemain = 0;
+      for (const L of (p.loans || [])) {
+        total += ceil(L.terms || 0);
+        paid += ceil(L.paidCount || 0);
+        late += ceil(L.lateCount || 0);
+        def += L.defaulted ? 1 : 0;
+        early += L.early ? 1 : 0;
+        if (L.state === 'active') activeRemain += ceil(L.remain || 0);
+      }
+      
+      if (total > 0) {
+        const ontime = paid / total;
+        if (ontime >= 0.95) s += 1.5;
+        else if (ontime >= 0.85) s += 1.0;
+        else if (ontime >= 0.7) s += 0.3;
+        else if (ontime < 0.5) s -= 1.0;
+        
+        if (late === 0 && total >= 3) s += 0.8;
+        else if (late > 0) {
+          const lateRatio = late / total;
+          s -= lateRatio * 3.0;
+        }
+      }
+      
+      if (early > 0) s += early * 0.8;
+      if (def > 0) s -= def * 2.5;
+      
+      const util = activeRemain / Math.max(1, nw);
+      if (util > 0.9) s -= 2.0;
+      else if (util > 0.7) s -= 1.2;
+      else if (util > 0.5) s -= 0.6;
+      else if (util < 0.3 && total > 0) s += 0.4;
+      
+      const types = [...new Set((p.loans || []).map(L => L.type))];
+      if (types.length >= 2) s += 0.3;
+      
+      s = Math.max(-3, Math.min(3, s));
+      return Math.round(s * 10) / 10;
+    }
+
+    function creditLabel(score) {
+      if (score <= -2.5) return 'Terrible';
+      if (score <= -1.5) return 'High Risk';
+      if (score <= -0.5) return 'Poor';
+      if (score < 0.5) return 'Fair';
+      if (score < 1.5) return 'Good';
+      if (score < 2.5) return 'Excellent';
+      return 'Perfect';
+    }
+
+    function capPct(base, score) {
+      if (score >= 2.5) return Math.floor(base * 2.5);
+      else if (score >= 2.0) return Math.floor(base * 2.0);
+      else if (score >= 1.5) return Math.floor(base * 1.6);
+      else if (score >= 0.5) return Math.floor(base * 1.2);
+      else if (score >= -0.5) return Math.floor(base * 0.9);
+      else if (score >= -1.5) return Math.floor(base * 0.6);
+      else if (score >= -2.5) return Math.floor(base * 0.3);
+      else return Math.floor(base * 0.1);
+    }
+
+    function maxLoan(p, type) {
+      const base = CAPS[type];
+      const nw = netWorth(p);
+      const creditScore = credit(p);
+      const adjustedPct = capPct(base, creditScore);
+      return Math.floor(nw * adjustedPct / 100);
+    }
+
+    function performance(p) {
+      let t = 0, paid = 0, late = 0, def = 0, early = 0;
+      for (const L of (p.loans || [])) {
+        t += ceil(L.terms || 0);
+        paid += ceil(L.paidCount || 0);
+        late += ceil(L.lateCount || 0);
+        def += L.defaulted ? 1 : 0;
+        early += L.early ? 1 : 0;
+      }
+      const pct = t ? Math.round(100 * paid / t) : 0;
+      return `On-time ${pct}% • Late ${late} • Early ${early} • Defaults ${def}`;
+    }
+
+    // Socket connection
+    function initSocket() {
+      socket = io();
+
+      socket.on('connect', () => {
+        $('#connectionStatus').textContent = 'Connected';
+        $('#connectionStatus').className = 'connection-status connected';
+      });
+
+      socket.on('disconnect', () => {
+        $('#connectionStatus').textContent = 'Disconnected';
+        $('#connectionStatus').className = 'connection-status disconnected';
+      });
+
+      socket.on('roomCreated', (data) => {
+        currentRoom = data.roomId;
+        gameMode = data.mode;
+        $('#roomInfo').textContent = `Room: ${currentRoom} (${gameMode})`;
+        showGameScreen();
+      });
+
+      socket.on('joinedRoom', (data) => {
+        currentRoom = data.roomId;
+        myPlayerId = data.playerId;
+        isHost = data.isHost;
+        gameMode = data.mode;
+        $('#roomInfo').textContent = `Room: ${currentRoom} (${gameMode})${isHost ? ' - HOST' : ''}`;
+        showGameScreen();
+      });
+
+      socket.on('roomUpdate', (data) => {
+        allPlayers.clear();
+        for (const player of data.players) {
+          allPlayers.set(player.id, player);
+        }
+        
+        if (data.gameStarted) {
+          $('#gameTitle').textContent = 'Game in Progress';
+          $('#startGame').classList.add('hidden');
+        }
+        
+        renderAllPlayers(data.currentTurn);
+        updateHostPanel();
+      });
+
+      socket.on('playerUpdate', (data) => {
+        const player = allPlayers.get(data.playerId);
+        if (player) {
+          Object.assign(player, data);
+          renderAllPlayers();
+        }
+      });
+
+      socket.on('gameStarted', (data) => {
+        $('#gameTitle').textContent = 'Game in Progress';
+        $('#startGame').classList.add('hidden');
+        renderAllPlayers(data.currentTurn);
+      });
+
+      socket.on('turnChanged', (data) => {
+        if (data.playerUpdate) {
+          const player = allPlayers.get(data.playerUpdate.playerId);
+          if (player) {
+            Object.assign(player, data.playerUpdate);
+          }
+        }
+        renderAllPlayers(data.currentTurn);
+      });
+
+      socket.on('kicked', (data) => {
+        $('#kickedMessage').textContent = data.reason || 'You have been kicked from the room.';
+        $('#kickedModal').classList.remove('hidden');
+      });
+
+      socket.on('banned', (data) => {
+        $('#bannedMessage').textContent = data.reason || 'You have been banned from this room.';
+        $('#bannedModal').classList.remove('hidden');
+      });
+
+      socket.on('roomDeleted', () => {
+        showError('Room has been deleted by the host.');
+        setTimeout(() => location.reload(), 2000);
+      });
+
+      socket.on('newHost', (data) => {
+        if (data.playerId === myPlayerId) {
+          isHost = true;
+          $('#roomInfo').textContent += ' - HOST';
+          showHostPanel();
+        }
+      });
+
+      socket.on('error', (message) => {
+        showError(message);
+      });
+    }
+
+    // UI Functions
+    function showGameScreen() {
+      $('#joinScreen').classList.add('hidden');
+      $('#gameScreen').classList.remove('hidden');
+      
+      if (isHost) {
+        showHostPanel();
+        $('#startGame').classList.remove('hidden');
+      }
+      
+      showPlayerPanel();
+    }
+
+    function showHostPanel() {
+      $('#hostPanel').classList.remove('hidden');
+      updateHostPanel();
+    }
+
+    function showPlayerPanel() {
+      $('#playerPanel').classList.remove('hidden');
+    }
+
+    function updateHostPanel() {
+      const select = $('#hostTargetPlayer');
+      select.innerHTML = '<option value="">Select player...</option>';
+      
+      for (const [playerId, player] of allPlayers) {
+        if (playerId !== myPlayerId) {
+          const option = document.createElement('option');
+          option.value = playerId;
+          option.textContent = player.name;
+          select.appendChild(option);
+        }
+      }
+    }
+
+    function renderAllPlayers(currentTurnPlayerId) {
+      const container = $('#allPlayers');
+      container.innerHTML = '';
+      
+      for (const [playerId, player] of allPlayers) {
+        const playerElement = renderPlayer(player, playerId === myPlayerId, playerId === currentTurnPlayerId);
+        container.appendChild(playerElement);
+      }
+      
+      // Update my player card in player panel
+      if (myPlayerId && allPlayers.has(myPlayerId)) {
+        const myPlayer = allPlayers.get(myPlayerId);
+        const myCard = $('#myPlayerCard');
+        myCard.innerHTML = '';
+        myCard.appendChild(renderPlayer(myPlayer, true, myPlayerId === currentTurnPlayerId, true));
+      }
+    }
+
+    function renderPlayer(player, isMe, isCurrentTurn, isPlayerPanel = false) {
+      const template = $('#playerTemplate').content.cloneNode(true);
+      const playerDiv = template.querySelector('.player');
+      
+      // Add classes for styling
+      if (isCurrentTurn) playerDiv.classList.add('is-turn');
+      if (player.isHost) playerDiv.classList.add('is-host');
+      
+      // Player info
+      template.querySelector('.player-name').textContent = player.name + (isMe ? ' (You)' : '');
+      
+      const creditScore = credit(player);
+      const creditLabelText = creditLabel(creditScore);
+      
+      template.querySelector('.score').textContent = `Score ${creditScore.toFixed(1)} (${creditLabelText})`;
+      template.querySelector('.worth').textContent = `NW ${netWorth(player)}`;
+      template.querySelector('.turns').textContent = `Turns ${player.turns || 0}`;
+      
+      if (player.isHost) {
+        template.querySelector('.host').classList.remove('hidden');
+      }
+      
+      // Max loans
+      template.querySelector('.max-loans').textContent = 
+        `${maxLoan(player, 'emergency')}/${maxLoan(player, 'normal')}/${maxLoan(player, 'dev')}`;
+      
+      // Performance
+      template.querySelector('.performance').textContent = performance(player);
+      
+      // Player fields - only editable if it's me
+      const fields = ['cash', 'income', 'land', 'homes'];
+      fields.forEach(field => {
+        const input = template.querySelector(`.${field}`);
+        input.value = player[field] || 0;
+        
+        if (isMe) {
+          input.addEventListener('change', (e) => {
+            const value = ceil(e.target.value);
+            socket.emit('updatePlayer', { [field]: value });
+          });
+        } else {
+          input.disabled = true;
+        }
+      });
+      
+      // Controls - only show if it's me
+      const controls = template.querySelector('.player-controls');
+      const loanSection = template.querySelector('.loan-section');
+      
+      if (isMe) {
+        // End turn button
+        template.querySelector('.endTurn').addEventListener('click', () => {
+          socket.emit('endTurn');
+        });
+        
+        // Loan type change handler
+        const loanType = template.querySelector('.loanType');
+        const installmentsField = template.querySelector('.installments-field');
+        const devWaitField = template.querySelector('.dev-wait-field');
+        const terms = template.querySelector('.loanTerms');
+        
+        function updateLoanFields() {
+          const type = loanType.value;
+          if (type === 'emergency') {
+            installmentsField.classList.add('hidden');
+            devWaitField.classList.add('hidden');
+            terms.value = 1;
+          } else if (type === 'dev') {
+            installmentsField.classList.remove('hidden');
+            devWaitField.classList.remove('hidden');
+          } else {
+            installmentsField.classList.remove('hidden');
+            devWaitField.classList.add('hidden');
+          }
+        }
+        
+        loanType.addEventListener('change', updateLoanFields);
+        updateLoanFields();
+        
+        // Preview loan
+        template.querySelector('.previewLoan').addEventListener('click', () => {
+          const type = loanType.value;
+          const amount = ceil(template.querySelector('.loanAmount').value);
+          const rate = RATES[type];
+          const max = maxLoan(player, type);
+          const actualAmount = Math.max(MIN_LOAN, Math.min(amount, max));
+          template.querySelector('.loanAmount').value = actualAmount;
+          
+          const termCount = type === 'emergency' ? 1 : ceil(template.querySelector('.loanTerms').value);
+          const total = Math.ceil(actualAmount * (1 + rate / 100));
+          const pergo = Math.ceil(total / termCount);
+          const wait = type === 'dev' ? Number(template.querySelector('.devWait').value) : (type === 'normal' ? 2 : 0);
+          
+          template.querySelector('.loan-calc').textContent = 
+            `Total ${total} • ${pergo} per installment • Disburse after ${wait} turn(s)`;
+        });
+        
+        // Take loan
+        template.querySelector('.takeLoan').addEventListener('click', () => {
+          const type = loanType.value;
+          const amount = ceil(template.querySelector('.loanAmount').value);
+          const terms = type === 'emergency' ? 1 : ceil(template.querySelector('.loanTerms').value);
+          const devWait = type === 'dev' ? Number(template.querySelector('.devWait').value) : 3;
+          
+          socket.emit('takeLoan', {
+            type,
+            amount,
+            terms,
+            devWait
+          });
+        });
+        
+      } else {
+        controls.classList.add('hidden');
+        loanSection.classList.add('hidden');
+      }
+      
+      // Render loans
+      const loansContainer = template.querySelector('.loans');
+      (player.loans || []).forEach(loan => {
+        const loanElement = renderLoan(loan, isMe);
+        loansContainer.appendChild(loanElement);
+      });
+      
+      return template;
+    }
+
+    function renderLoan(loan, isMyLoan) {
+      const template = $('#loanTemplate').content.cloneNode(true);
+      
+      // Loan info
+      template.querySelector('.loan-badge').textContent = loan.type.toUpperCase();
+      template.querySelector('.loan-badge').className = `loan-badge ${loan.type}`;
+      template.querySelector('.loan-id').textContent = loan.id;
+      template.querySelector('.loan-state').textContent = loan.state;
+      template.querySelector('.loan-pergo').textContent = loan.pergo;
+      template.querySelector('.loan-left').textContent = Math.max(0, loan.terms - (loan.paidCount || 0));
+      template.querySelector('.loan-remain').textContent = loan.remain;
+      
+      // Loan details
+      template.querySelector('.loan-principal').value = loan.principal;
+      template.querySelector('.loan-rate').value = loan.rate;
+      template.querySelector('.loan-terms-display').value = loan.terms;
+      template.querySelector('.loan-delay').value = loan.delayTurns;
+      
+      // Loan log
+      const log = template.querySelector('.loan-log');
+      log.innerHTML = (loan.log || []).slice(-4).map(x => '• ' + x).join('<br>');
+      
+      // Loan operations - only show if it's my loan
+      if (isMyLoan) {
+        // Pay loan
+        template.querySelector('.payLoan').addEventListener('click', () => {
+          socket.emit('loanOperation', { loanId: loan.id, operation: 'pay' });
+        });
+        
+        // Early payoff
+        template.querySelector('.earlyPayoff').addEventListener('click', () => {
+          if (confirm('Pay off early with 2% penalty?')) {
+            socket.emit('loanOperation', { loanId: loan.id, operation: 'early' });
+          }
+        });
+        
+        // Late payment
+        template.querySelector('.latePay').addEventListener('click', () => {
+          if (confirm('Mark as late payment? This will damage your credit and add 10% fee.')) {
+            socket.emit('loanOperation', { loanId: loan.id, operation: 'late' });
+          }
+        });
+        
+        // Default
+        template.querySelector('.defaultLoan').addEventListener('click', () => {
+          if (confirm('Default on loan? This will seize assets and severely damage credit.')) {
+            socket.emit('loanOperation', { loanId: loan.id, operation: 'default' });
+          }
+        });
+      } else {
+        // Hide controls for other players' loans
+        template.querySelector('.payLoan').classList.add('hidden');
+        template.querySelector('.earlyPayoff').classList.add('hidden');
+        template.querySelector('.latePay').classList.add('hidden');
+        template.querySelector('.defaultLoan').classList.add('hidden');
+      }
+      
+      return template;
+    }
+
+    // Event Listeners
+    $('#createRoom').addEventListener('click', () => {
+      const mode = $('#gameMode').value;
+      socket.emit('createRoom', { mode });
+    });
+
+    $('#joinRoom').addEventListener('click', () => {
+      const roomId = $('#roomId').value.trim().toUpperCase();
+      const playerName = $('#playerName').value.trim() || 'Player';
+      
+      if (roomId) {
+        socket.emit('joinRoom', { roomId, playerName });
+      } else {
+        // Create new room if no room ID provided
+        const mode = $('#gameMode').value;
+        socket.emit('createRoom', { mode });
+      }
+    });
+
+    $('#startGame').addEventListener('click', () => {
+      socket.emit('startGame');
+    });
+
+    $('#leaveRoom').addEventListener('click', () => {
+      if (confirm('Leave room?')) {
+        location.reload();
+      }
+    });
+
+    $('#kickPlayer').addEventListener('click', () => {
+      const playerId = $('#hostTargetPlayer').value;
+      if (playerId) {
+        const reason = prompt('Reason for kicking (optional):') || 'No reason provided';
+        socket.emit('hostOperation', { operation: 'kick', targetPlayerId: playerId, reason });
+      }
+    });
+
+    $('#banPlayer').addEventListener('click', () => {
+      const playerId = $('#hostTargetPlayer').value;
+      if (playerId && confirm('Ban this player? They will not be able to rejoin.')) {
+        const reason = prompt('Reason for ban (optional):') || 'No reason provided';
+        socket.emit('hostOperation', { operation: 'ban', targetPlayerId: playerId, reason });
+      }
+    });
+
+    $('#deleteRoom').addEventListener('click', () => {
+      if (confirm('Delete room? This will kick all players and cannot be undone.')) {
+        socket.emit('hostOperation', { operation: 'deleteRoom' });
+      }
+    });
+
+    // Auto-uppercase room ID input
+    $('#roomId').addEventListener('input', (e) => {
+      e.target.value = e.target.value.toUpperCase();
+    });
+
+    // Initialize
+    initSocket();
+  </script>
+</body>
+</html>
