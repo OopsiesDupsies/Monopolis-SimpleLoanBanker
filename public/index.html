@@ -762,8 +762,12 @@
       <div class="loan-log log"></div>
     </div>
   </template>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+  // Replace AFTER you deploy Cloud Run (step C) with the real URL:
+  window.API_URL = "https://monocredit-315390796983.europe-west1.run.app";
+</script>
 
-  <script src="/socket.io/socket.io.js"></script>
   <script>
     // Enhanced Settings
     const RATES = { emergency: 50, normal: 20, dev: 15 };
@@ -781,7 +785,7 @@
 
     // Utility functions
     const $ = s => document.querySelector(s);
-    const $ = s => Array.from(document.querySelectorAll(s));
+    const $$ = s => Array.from(document.querySelectorAll(s));
     const ceil = n => Math.ceil(Number(n || 0));
     
     function showError(message) {
@@ -838,7 +842,7 @@
       else if (util > 0.5) s -= 0.6;
       else if (util < 0.3 && total > 0) s += 0.4;
       
-      const types = [...new Set((p.loans || []).map(L => L.type))];
+      const types = new Set((p.loans || []).map(L => L.type));
       if (types.length >= 2) s += 0.3;
       
       s = Math.max(-3, Math.min(3, s));
@@ -889,7 +893,8 @@
 
     // Socket connection
     function initSocket() {
-      socket = io();
+      socket = io(window.API_URL, { transports: ["websocket","polling"] });
+
 
       socket.on('connect', () => {
         $('#connectionStatus').textContent = 'Connected';
