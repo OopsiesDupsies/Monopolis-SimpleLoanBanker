@@ -1,0 +1,78 @@
+111:    const [confirmAction, setConfirmAction] = useState<{ type: string, data: any } | null>(null);
+331:        setConfirmAction({
+596:                            <button className="btn btn-ghost text-danger" style={{ width: 'auto', padding: '10px 20px' }} onClick={() => setConfirmAction({ type: 'bankrupt', data: {} })}>
+1063:                                                                        setConfirmAction({
+1103:                                                                            setConfirmAction({
+1133:                                                                            setConfirmAction({
+1150:                                                                            setConfirmAction({
+1167:                                                                                setConfirmAction({
+1196:                                                                            setConfirmAction({
+1216:                                                                        setConfirmAction({
+1232:                                                                        setConfirmAction({
+1264:                                                                        setConfirmAction({
+1307:                                                                                setConfirmAction({
+1326:                                                                        setConfirmAction({
+1823:                                                onClick={() => setConfirmAction({
+2291:                isOpen={confirmAction !== null}
+2292:                onClose={() => setConfirmAction(null)}
+2294:                    confirmAction?.type === 'bankrupt' ? 'Declare Bankruptcy' :
+2295:                        confirmAction?.type === 'rewind' ? 'Rewind' :
+2296:                            confirmAction?.type === 'buy_property' ? 'Buy Property' :
+2297:                                confirmAction?.type === 'sell_property' ? 'Sell Property' :
+2298:                                    confirmAction?.type === 'mortgage' ? 'Mortgage Property' :
+2299:                                        confirmAction?.type === 'unmortgage' ? 'Unmortgage Property' :
+2300:                                            confirmAction?.type === 'pay_rent' ? 'Pay Rent' :
+2301:                                                confirmAction?.type === 'transfer' ? 'Send Money' :
+2302:                                                    confirmAction?.type === 'build' ? 'Build' :
+2303:                                                        confirmAction?.type === 'demolish' ? 'Demolish' :
+2304:                                                            confirmAction?.type === 'dev_loan' ? 'Development Loan' :
+2309:                        <button className="btn btn-ghost" onClick={() => setConfirmAction(null)}>Cancel</button>
+2311:                            className={`btn ${confirmAction?.type === 'bankrupt' || confirmAction?.type === 'sell_property' || confirmAction?.type === 'demolish' ? 'btn-danger' :
+2312:                                confirmAction?.type === 'rewind' || confirmAction?.type === 'mortgage' ? 'btn-warning' :
+2316:                                const d = confirmAction?.data;
+2317:                                switch (confirmAction?.type) {
+2359:                                setConfirmAction(null);
+2362:                            {confirmAction?.type === 'rewind' ? 'Rewind' :
+2363:                                confirmAction?.type === 'buy_property' ? `Buy $${confirmAction?.data?.price}` :
+2364:                                    confirmAction?.type === 'sell_property' ? `Sell $${confirmAction?.data?.salePrice}` :
+2365:                                        confirmAction?.type === 'pay_rent' ? `Pay $${confirmAction?.data?.rent}` :
+2366:                                            confirmAction?.type === 'transfer' ? `Send $${confirmAction?.data?.amount}` :
+2367:                                                confirmAction?.type === 'build' ? `Build $${confirmAction?.data?.cost}` :
+2368:                                                    confirmAction?.type === 'demolish' ? 'Demolish' :
+2369:                                                        confirmAction?.type === 'dev_loan' ? `Finance $${confirmAction?.data?.totalCost}` :
+2375:                {confirmAction?.type === 'bankrupt' && (
+2378:                {confirmAction?.type === 'rewind' && (
+2381:                        <p style={{ fontWeight: 600, color: 'var(--mono-gold)', marginBottom: 8 }}>"{confirmAction.data.description}"</p>
+2385:                {confirmAction?.type === 'buy_property' && (
+2387:                        <p style={{ fontSize: 14, marginBottom: 8 }}>Buy <strong>{confirmAction.data.name}</strong>?</p>
+2388:                        <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--mono-green)' }}>${confirmAction.data.price}</p>
+2391:                {confirmAction?.type === 'sell_property' && (
+2393:                        <p style={{ fontSize: 14, marginBottom: 8 }}>Sell <strong>{confirmAction.data.name}</strong> to bank?</p>
+2394:                        <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--mono-gold)' }}>${confirmAction.data.salePrice}</p>
+2395:                        {confirmAction.data.isMortgaged && (
+2397:                                (Price ${confirmAction.data.price} - Mortgage ${confirmAction.data.mortgageValue})
+2402:                {confirmAction?.type === 'mortgage' && (
+2404:                        <p style={{ fontSize: 14, marginBottom: 8 }}>Mortgage <strong>{confirmAction.data.name}</strong>?</p>
+2405:                        <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--mono-gold)' }}>+${confirmAction.data.mortgageValue}</p>
+2407:                            Unmortgage cost: ${Math.ceil(confirmAction.data.mortgageValue * 1.1)}
+2411:                {confirmAction?.type === 'unmortgage' && (
+2413:                        <p style={{ fontSize: 14, marginBottom: 8 }}>Unmortgage <strong>{confirmAction.data.name}</strong>?</p>
+2414:                        <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--mono-red)' }}>-${confirmAction.data.cost}</p>
+2417:                {confirmAction?.type === 'pay_rent' && (
+2419:                        <p style={{ fontSize: 14, marginBottom: 8 }}>Pay rent for <strong>{confirmAction.data.name}</strong>?</p>
+2420:                        <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--mono-red)' }}>${confirmAction.data.rent}</p>
+2422:                            To: {confirmAction.data.ownerName}
+2426:                {confirmAction?.type === 'transfer' && (
+2428:                        <p style={{ fontSize: 14, marginBottom: 8 }}>Send money to <strong>{confirmAction.data.toName}</strong>?</p>
+2429:                        <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--mono-red)' }}>${confirmAction.data.amount}</p>
+2432:                {confirmAction?.type === 'build' && (
+2434:                        <p style={{ fontSize: 14, marginBottom: 8 }}>Build on <strong>{confirmAction.data.name}</strong>?</p>
+2435:                        <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--mono-red)' }}>-${confirmAction.data.cost}</p>
+2437:                            {confirmAction.data.isHotel ? 'Hotel' : `House #${confirmAction.data.houseNum}`}
+2441:                {confirmAction?.type === 'demolish' && (
+2443:                        <p style={{ fontSize: 14, marginBottom: 8 }}>Demolish on <strong>{confirmAction.data.name}</strong>?</p>
+2444:                        <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--mono-green)' }}>+${confirmAction.data.refund}</p>
+2450:                {confirmAction?.type === 'dev_loan' && (
+2452:                        <p style={{ fontSize: 14, marginBottom: 8 }}>Finance development of <strong style={{ color: 'var(--mono-purple)' }}>{confirmAction.data.groupName}</strong>?</p>
+2453:                        <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--mono-purple)' }}>${confirmAction.data.totalCost}</p>
+2884:                                    setConfirmAction({ type: 'bankrupt', data: {} });

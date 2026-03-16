@@ -1,0 +1,24 @@
+72:function calcNetWorth(player: any, stockPrice: number, allProperties?: any[]): number {
+79:    return assets + player.balance + (player.shares * stockPrice) - activeDebt(player);
+236:    const netWorth = calcNetWorth(me, state.market.stockPrice, state.properties);
+237:    const portfolioValue = me.shares * state.market.stockPrice;
+503:                            GO: salary + loan payments | End Turn: stock tick only | Jail: payments + stock tick
+508:                        <div style={{ display: 'grid', gridTemplateColumns: state.settings.stocks !== false ? 'repeat(5, 1fr)' : 'repeat(4, 1fr)', gap: 10 }}>
+514:                                ...(state.settings.stocks !== false ? [{ icon: Icons.trade, label: 'Trade', action: () => setShowTradingModal(true), color: '#8B5CF6' }] : []),
+551:                        {state.settings.stocks !== false && (
+564:                                        <p style={{ fontSize: 10, color: 'var(--text-muted)' }}>Stock Price</p>
+565:                                        <p style={{ fontSize: 18, fontWeight: 700 }}>${state.market.stockPrice}</p>
+1326:                        {state.settings.stocks !== false ? (
+1334:                                        <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>MONOBANK Stock</p>
+1335:                                        <p style={{ fontSize: 40, fontWeight: 700, letterSpacing: '-2px', margin: '8px 0' }}>${state.market.stockPrice}</p>
+1352:                                                ${(state.players.reduce((acc: number, p: any) => acc + (p.shares || 0), 0) * state.market.stockPrice).toLocaleString()}
+1357:                                    {/* Stock Price Chart */}
+1411:                                    <h4 style={{ marginBottom: 12 }}>Trade Stock</h4>
+1423:                                                <span style={{ fontSize: 13, fontWeight: 600 }}>${Math.ceil(Number(amount) * state.market.stockPrice * 1.02)}</span>
+1434:                                            onClick={() => { if (amount && Number(amount) > 0) { send('buy_stock', { player_id: me.id, qty: Number(amount) }); setAmount(''); } }}
+1435:                                            disabled={!amount || Number(amount) <= 0 || availableCash < Math.ceil(Number(amount) * state.market.stockPrice * 1.02)}
+1441:                                            onClick={() => { if (amount && Number(amount) > 0) { send('sell_stock', { player_id: me.id, qty: Number(amount) }); setAmount(''); } }}
+1872:                    {state.settings.stocks !== false ? Icons.chart : Icons.trade}
+1873:                    <span>{state.settings.stocks !== false ? 'Invest' : 'Trade'}</span>
+2696:                                    {state.settings.stocks !== false ? Icons.trendUp : Icons.trade}
+2697:                                    <strong>{state.settings.stocks !== false ? 'Invest' : 'Trade'}</strong> — {state.settings.stocks !== false ? 'buy/sell stocks on the market' : 'propose trades with other players'}

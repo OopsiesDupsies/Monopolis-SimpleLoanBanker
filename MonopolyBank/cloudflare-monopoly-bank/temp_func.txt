@@ -1,0 +1,79 @@
+﻿    bankIssueSharesOptimal(): number {
+        const bank = this.gameState.bank;
+        const players = this.gameState.players;
+        
+        // Calculate B = total cash balances of all players
+        const B = players.reduce((sum, p) => sum + p.balance, 0);
+        
+        // Pâ‚€ = current stock price
+        const P0 = bank.stockPrice || STOCK_PRICE_DEFAULT;
+        
+        // S = shares outstanding (free float)
+        const S = bank.sharesOutstanding || 1;  // Use 1 to avoid division by zero
+        
+        // If no shares issued yet, do first issuance at default price
+        if (bank.sharesOutstanding <= 0) {
+            const initialShares = Math.max(MIN_ISSUANCE_SHARES, Math.floor(B * STOCK_ISSUANCE_F / P0));
+            bank.sharesOutstanding = initialShares;
+            bank.treasuryShares = initialShares;
+            bank.stockPrice = P0;
+            const cashRaised = initialShares * P0;
+            bank.cash += cashRaised;
+            this.logTransaction(`Bank issued ${initialShares} NEW shares (first issuance) at $${P0} (raised $${cashRaised})`, cashRaised);
+            return initialShares;
+        }
+        
+        // Calculate optimal issuance: Q* â‰ˆ min(S/k, f*B/Pâ‚€)
+        const Q1 = Math.floor(S / STOCK_ISSUANCE_K);
+        const Q2 = Math.floor((STOCK_ISSUANCE_F * B) / P0);
+        let Qstar = Math.min(Q1, Q2);
+        
+        // Apply constraints to prevent over-issuance
+        // Constraint 1: Don't issue more than MAX_ISSUANCE_PCT_OF_OUTSTANDING% of outstanding
+        const maxIssuancePct = Math.floor((S * MAX_ISSUANCE_PCT_OF_OUTSTANDING) / 100);
+        Qstar = Math.min(Qstar, maxIssuancePct);
+        
+        // Constraint 2: Absolute hard cap
+        Qstar = Math.min(Qstar, MAX_ISSUANCE_SHARES_ABSOLUTE);
+        
+        // Constraint 3: Minimum issuance threshold (must have some demand)
+        if (Qstar < MIN_ISSUANCE_SHARES) {
+            // Only issue if there's significant demand: f*B >= Pâ‚€ * MIN_ISSUANCE_SHARES
+            if (B * STOCK_ISSUANCE_F < P0 * MIN_ISSUANCE_SHARES) {
+                return 0;  // Not enough demand - skip issuance this round
+            }
+            Qstar = MIN_ISSUANCE_SHARES;  // Issue minimum if there's demand
+        }
+        
+        // Calculate price after issuance: P(Q) = Pâ‚€ * e^(-kQ/S)
+        // EXACT exponential formula: e^(-kQ/S)
+        const kQ_S = (STOCK_ISSUANCE_K * Qstar) / S;  // kQ/S (exponent)
+        const expFactor = Math.exp(-kQ_S);  // e^(-kQ/S)
+        const P_Q = Math.max(STOCK_PRICE_MIN, Math.floor(P0 * expFactor));
+        
+        // Calculate demand: D(Q) = fB / P(Q)
+        const demand = Math.floor((STOCK_ISSUANCE_F * B) / P_Q);
+        
+        // Actual issuance is limited by demand
+        const actualQ = Math.min(Qstar, demand);
+        
+        if (actualQ < MIN_ISSUANCE_SHARES) {
+            return 0;  // Not enough demand to justify issuance
+        }
+        
+        // Calculate cash raised: R(Q*) = Q* * Pâ‚€ * e^(-kQ*/S) = actualQ * P_Q
+        // This matches the formula: R(Q*) = P(Q) * min(Q*, D(Q))
+        const cashRaised = actualQ * P_Q;
+        
+        // Update bank state
+        const oldSharesOutstanding = S;
+        bank.sharesOutstanding += actualQ;
+        bank.treasuryShares += actualQ;  // Goes to treasury (bank can sell them)
+        bank.cash += cashRaised;
+        bank.stockPrice = P_Q;  // Price updates to new diluted price (exponential impact)
+        
+        const dilutionPct = Math.floor((actualQ * 100) / oldSharesOutstanding);
+        this.logTransaction(`Bank issued ${actualQ} NEW shares @ $${P_Q} (raised $${cashRaised}, ${dilutionPct}% dilution, price: $${P0} â†’ $${P_Q}, Q*=${Qstar}, D=${demand}, kQ/S=${kQ_S.toFixed(3)}, e^(-kQ/S)=${expFactor.toFixed(4)})`, cashRaised);
+        
+        return actualQ;
+    }

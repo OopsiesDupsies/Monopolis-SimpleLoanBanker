@@ -1,0 +1,22 @@
+src/game_room.ts(500,12): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/game_room.ts(1292,74): error TS2339: Property 'stockPrice' does not exist on type 'Bank'.
+src/game_room.ts(1339,48): error TS2339: Property 'stockPrice' does not exist on type 'Bank'.
+src/game_room.ts(2293,17): error TS2322: Type 'number' is not assignable to type 'Record<string, number>'.
+src/game_room.ts(2541,67): error TS2339: Property 'stockPrice' does not exist on type 'Bank'.
+src/game_room.ts(2542,87): error TS2339: Property 'stockPrice' does not exist on type 'Bank'.
+src/game_room.ts(2564,35): error TS2339: Property 'stockPrice' does not exist on type 'Bank'.
+src/game_room.ts(2577,40): error TS2339: Property 'dumpedShares' does not exist on type 'Bank'.
+src/game_room.ts(2578,18): error TS2339: Property 'dumpedShares' does not exist on type 'Bank'.
+src/game_room.ts(2579,18): error TS2339: Property 'circulatingShares' does not exist on type 'Bank'.
+src/game_room.ts(2583,22): error TS2339: Property 'sharesOutstanding' does not exist on type 'Bank'.
+src/game_room.ts(2584,22): error TS2339: Property 'circulatingShares' does not exist on type 'Bank'.
+src/game_room.ts(2587,13): error TS2365: Operator '+=' cannot be applied to types 'Record<string, number>' and 'number'.
+src/game_room.ts(2588,20): error TS2339: Property 'tickBuyVolume' does not exist on type 'Market'.
+src/game_room.ts(2609,17): error TS2365: Operator '<' cannot be applied to types 'Record<string, number>' and 'number'.
+src/game_room.ts(2614,36): error TS2339: Property 'stockPrice' does not exist on type 'Bank'.
+src/game_room.ts(2619,13): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/game_room.ts(2621,18): error TS2339: Property 'circulatingShares' does not exist on type 'Bank'.
+src/game_room.ts(2622,18): error TS2339: Property 'dumpedShares' does not exist on type 'Bank'.
+src/game_room.ts(2626,20): error TS2339: Property 'tickSellVolume' does not exist on type 'Market'.
+src/game_room.ts(2835,18): error TS2339: Property 'runStockTick_END_TURN_ONLY' does not exist on type 'GameRoom'.
+src/game_room.ts(2865,18): error TS2339: Property 'runStockTick_END_TURN_ONLY' does not exist on type 'GameRoom'.
